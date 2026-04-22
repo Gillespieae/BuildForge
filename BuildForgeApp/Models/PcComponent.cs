@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace BuildForgeApp.Models
-{   // Represents a hardware component that can be used in a PC build
+{
     public class PcComponent
     {
         public int Id { get; set; }
@@ -30,6 +30,8 @@ namespace BuildForgeApp.Models
         public int? Wattage { get; set; }
 
         public int? CapacityGB { get; set; }
+
+        public int StockQuantity { get; set; }
 
         public bool IsActive { get; set; } = true;
 
