@@ -13,14 +13,12 @@ namespace BuildForgeApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
 
-        // Handles build-related actions for logged-in users
         public BuildsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
-        // Shows only the current user's builds
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
@@ -33,7 +31,6 @@ namespace BuildForgeApp.Controllers
             return View(builds);
         }
 
-        // Shows details for one build owned by the current user
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -53,16 +50,16 @@ namespace BuildForgeApp.Controllers
                 return NotFound();
             }
 
+            build.TotalPrice = CalculateTotalPrice(build);
+
             return View(build);
         }
 
-        // Displays the create build page
         public IActionResult Create()
         {
             return View();
         }
 
-        // Creates a new build for the logged-in user
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BuildName")] Build build)
@@ -88,7 +85,6 @@ namespace BuildForgeApp.Controllers
             return View(build);
         }
 
-        // Displays the edit page for a user's build
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -109,7 +105,6 @@ namespace BuildForgeApp.Controllers
             return View(build);
         }
 
-        // Saves changes to a user's build
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,BuildName")] Build build)
@@ -121,6 +116,8 @@ namespace BuildForgeApp.Controllers
 
             var userId = _userManager.GetUserId(User);
             var existingBuild = await _context.Builds
+                .Include(b => b.BuildComponents)
+                .ThenInclude(bc => bc.PcComponent)
                 .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
 
             if (existingBuild == null)
@@ -131,6 +128,7 @@ namespace BuildForgeApp.Controllers
             if (ModelState.IsValid)
             {
                 existingBuild.BuildName = build.BuildName;
+                existingBuild.TotalPrice = CalculateTotalPrice(existingBuild);
 
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -139,7 +137,6 @@ namespace BuildForgeApp.Controllers
             return View(build);
         }
 
-        // Displays the delete confirmation page
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -160,7 +157,6 @@ namespace BuildForgeApp.Controllers
             return View(build);
         }
 
-        // Deletes a user's build
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -179,6 +175,13 @@ namespace BuildForgeApp.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private decimal CalculateTotalPrice(Build build)
+        {
+            return build.BuildComponents
+                .Where(bc => bc.PcComponent != null)
+                .Sum(bc => bc.PcComponent!.Price);
         }
     }
 }
