@@ -34,9 +34,7 @@ namespace BuildForgeApp.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var userId = _userManager.GetUserId(User);
 
@@ -46,11 +44,7 @@ namespace BuildForgeApp.Controllers
                 .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
 
             if (build == null)
-            {
                 return NotFound();
-            }
-
-            build.TotalPrice = CalculateTotalPrice(build);
 
             return View(build);
         }
@@ -62,35 +56,27 @@ namespace BuildForgeApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BuildName")] Build build)
+        public async Task<IActionResult> Create(Build build)
         {
             var userId = _userManager.GetUserId(User);
 
             if (userId == null)
-            {
                 return Challenge();
-            }
 
-            if (ModelState.IsValid)
-            {
-                build.UserId = userId;
-                build.CreatedDate = DateTime.Now;
-                build.TotalPrice = 0;
+            build.UserId = userId;
+            build.CreatedDate = DateTime.Now;
+            build.TotalPrice = 0;
 
-                _context.Add(build);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
+            _context.Add(build);
+            await _context.SaveChangesAsync();
 
-            return View(build);
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var userId = _userManager.GetUserId(User);
 
@@ -98,68 +84,14 @@ namespace BuildForgeApp.Controllers
                 .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
 
             if (build == null)
-            {
                 return NotFound();
-            }
 
             return View(build);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BuildName")] Build build)
-        {
-            if (id != build.Id)
-            {
-                return NotFound();
-            }
-
-            var userId = _userManager.GetUserId(User);
-            var existingBuild = await _context.Builds
-                .Include(b => b.BuildComponents)
-                .ThenInclude(bc => bc.PcComponent)
-                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
-
-            if (existingBuild == null)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                existingBuild.BuildName = build.BuildName;
-                existingBuild.TotalPrice = CalculateTotalPrice(existingBuild);
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(build);
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var userId = _userManager.GetUserId(User);
-
-            var build = await _context.Builds
-                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
-
-            if (build == null)
-            {
-                return NotFound();
-            }
-
-            return View(build);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Edit(int id, string buildName)
         {
             var userId = _userManager.GetUserId(User);
 
@@ -167,21 +99,47 @@ namespace BuildForgeApp.Controllers
                 .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
 
             if (build == null)
-            {
                 return NotFound();
-            }
 
-            _context.Builds.Remove(build);
+            build.BuildName = buildName;
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
 
-        private decimal CalculateTotalPrice(Build build)
+        public async Task<IActionResult> Delete(int? id)
         {
-            return build.BuildComponents
-                .Where(bc => bc.PcComponent != null)
-                .Sum(bc => bc.PcComponent!.Price);
+            if (id == null)
+                return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+
+            var build = await _context.Builds
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+
+            if (build == null)
+                return NotFound();
+
+            return View(build);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var build = await _context.Builds
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+
+            if (build == null)
+                return NotFound();
+
+            _context.Builds.Remove(build);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
