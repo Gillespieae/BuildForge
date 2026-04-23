@@ -1,0 +1,19 @@
+@model BuildForgeApp.Models.Build
+
+@{
+    ViewData["Title"] = "Edit Build";
+}
+
+<h1>Edit Build</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="mb-3">
+        <label>Build Name</label>
+        <input type="text" name="buildName" value="@Model.BuildName" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
