@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BuildForgeApp.Data;
+using BuildForgeApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +65,74 @@ using (var scope = app.Services.CreateScope())
         var user = new IdentityUser { UserName = adminEmail, Email = adminEmail };
         await userManager.CreateAsync(user, "Admin123!");
         await userManager.AddToRoleAsync(user, "Admin");
+    }
+}
+
+// Test component seeding
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+
+    if (!context.PcComponents.Any())
+    {
+        context.PcComponents.AddRange(
+            new PcComponent
+            {
+                Name = "Ryzen 5 5600X",
+                Brand = "AMD",
+                ComponentType = "CPU",
+                Price = 199.99m,
+                SocketType = "AM4",
+                Wattage = 65,
+                StockQuantity = 10,
+                IsActive = true
+            },
+            new PcComponent
+            {
+                Name = "Core i5-12600K",
+                Brand = "Intel",
+                ComponentType = "CPU",
+                Price = 249.99m,
+                SocketType = "LGA1700",
+                Wattage = 125,
+                StockQuantity = 8,
+                IsActive = true
+            },
+            new PcComponent
+            {
+                Name = "RTX 3060",
+                Brand = "NVIDIA",
+                ComponentType = "GPU",
+                Price = 329.99m,
+                Wattage = 170,
+                StockQuantity = 5,
+                IsActive = true
+            },
+            new PcComponent
+            {
+                Name = "Corsair 16GB DDR4",
+                Brand = "Corsair",
+                ComponentType = "RAM",
+                Price = 79.99m,
+                CapacityGB = 16,
+                StockQuantity = 15,
+                IsActive = true
+            },
+            new PcComponent
+            {
+                Name = "ASUS B550 Motherboard",
+                Brand = "ASUS",
+                ComponentType = "Motherboard",
+                Price = 149.99m,
+                SocketType = "AM4",
+                FormFactor = "ATX",
+                StockQuantity = 6,
+                IsActive = true
+            }
+        );
+
+        context.SaveChanges();
     }
 }
 
