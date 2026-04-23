@@ -1,0 +1,46 @@
+@model IEnumerable<BuildForgeApp.Models.Build>
+
+@{
+    ViewData["Title"] = "My Builds";
+}
+
+<h1>My Builds</h1>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Create New Build</a>
+
+@if (!Model.Any())
+{
+    <p>You have no saved builds.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Created</th>
+                <th>Total Price</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+@foreach (var build in Model)
+{
+        <tr>
+            <td>@build.BuildName</td>
+            <td>@build.CreatedDate.ToShortDateString()</td>
+            <td>@build.TotalPrice.ToString("C")</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@build.Id" class="btn btn-info btn-sm">Open</a>
+                <a asp-action="Edit" asp-route-id="@build.Id" class="btn btn-warning btn-sm">Edit</a>
+
+                <form asp-action="Delete" method="post" style="display:inline;">
+                    <input type="hidden" name="id" value="@build.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+}
+        </tbody>
+    </table>
+}
