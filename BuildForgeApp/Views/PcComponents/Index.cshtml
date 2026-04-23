@@ -5,105 +5,76 @@
     var categories = ViewBag.Categories as List<string> ?? new List<string>();
     var brands = ViewBag.Brands as List<string> ?? new List<string>();
     var selectedCategory = ViewBag.SelectedCategory as string;
-    var searchString = ViewBag.SearchString as string;
     var selectedBrand = ViewBag.SelectedBrand as string;
 }
 
 <h1>Component Catalog</h1>
 
 <form asp-action="Index" method="get" class="mb-4">
+    <input type="hidden" name="buildId" value="@ViewBag.BuildId" />
+
     <div class="row g-3">
         <div class="col-md-4">
-            <label class="form-label">Search</label>
-            <input type="text" name="searchString" value="@searchString" class="form-control" placeholder="Search components..." />
+            <input type="text" name="searchString" class="form-control" placeholder="Search..." />
         </div>
 
         <div class="col-md-3">
-            <label class="form-label">Category</label>
             <select name="category" class="form-select">
                 <option value="">All Categories</option>
-                @foreach (var category in categories)
+                @foreach (var c in categories)
                 {
-                    if (selectedCategory == category)
-                    {
-                        <option value="@category" selected>@category</option>
-                    }
-                    else
-                    {
-                        <option value="@category">@category</option>
-                    }
+                    <option value="@c">@c</option>
                 }
             </select>
         </div>
 
         <div class="col-md-3">
-            <label class="form-label">Brand</label>
             <select name="brand" class="form-select">
                 <option value="">All Brands</option>
-                @foreach (var brand in brands)
+                @foreach (var b in brands)
                 {
-                    if (selectedBrand == brand)
-                    {
-                        <option value="@brand" selected>@brand</option>
-                    }
-                    else
-                    {
-                        <option value="@brand">@brand</option>
-                    }
+                    <option value="@b">@b</option>
                 }
             </select>
         </div>
 
-        <div class="col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Apply</button>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Filter</button>
         </div>
     </div>
 </form>
 
-<div class="mb-4">
-    <h4>Browse by Category</h4>
-    <div class="d-flex flex-wrap gap-2">
-        <a asp-action="Index" class="btn btn-outline-secondary">All</a>
-        @foreach (var category in categories)
-        {
-            <a asp-action="Index" asp-route-category="@category" class="btn btn-outline-primary">@category</a>
-        }
-    </div>
-</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Brand</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.Brand</td>
+            <td>@item.ComponentType</td>
+            <td>@item.Price.ToString("C")</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
 
-@if (!Model.Any())
-{
-    <p>No components matched your search or filters.</p>
+                @if (ViewBag.BuildId != null)
+                {
+                    <form asp-action="AddToBuild" method="post" style="display:inline;">
+                        <input type="hidden" name="buildId" value="@ViewBag.BuildId" />
+                        <input type="hidden" name="componentId" value="@item.Id" />
+                        <button type="submit" class="btn btn-sm btn-success">Add</button>
+                    </form>
+                }
+            </td>
+        </tr>
 }
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Brand</th>
-                <th>Type</th>
-                <th>Price</th>
-                <th>Socket</th>
-                <th>Form Factor</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Name</td>
-                <td>@item.Brand</td>
-                <td>@item.ComponentType</td>
-                <td>@item.Price.ToString("C")</td>
-                <td>@(string.IsNullOrEmpty(item.SocketType) ? "N/A" : item.SocketType)</td>
-                <td>@(string.IsNullOrEmpty(item.FormFactor) ? "N/A" : item.FormFactor)</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
+    </tbody>
+</table>
