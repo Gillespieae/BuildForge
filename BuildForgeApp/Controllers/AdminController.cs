@@ -6,36 +6,40 @@ using BuildForgeApp.Models;
 
 namespace BuildForgeApp.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // restricts ALL actions in this controller to Admin users only
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
 
+        // inject database context for CRUD operations
         public AdminController(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        // shows all components (active + inactive)
         public async Task<IActionResult> Index()
         {
             var components = await _context.PcComponents
-                .OrderBy(c => c.ComponentType)
-                .ThenBy(c => c.Brand)
-                .ThenBy(c => c.Name)
+                .OrderBy(c => c.ComponentType) // group by type first (CPU, GPU, etc.)
+                .ThenBy(c => c.Brand)         // then brand (Intel, AMD)
+                .ThenBy(c => c.Name)          // then specific model
                 .ToListAsync();
 
             return View(components);
         }
 
+        // returns empty form for creating a new component
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken] // prevents CSRF attacks from external sites
         public async Task<IActionResult> Create(PcComponent component)
         {
+            // validates based on model annotations
             if (!ModelState.IsValid)
             {
                 return View(component);
@@ -43,7 +47,7 @@ namespace BuildForgeApp.Controllers
 
             try
             {
-                component.IsActive = true;
+                component.IsActive = true; // ensures new components are visible by default
 
                 _context.PcComponents.Add(component);
                 await _context.SaveChangesAsync();
@@ -52,11 +56,13 @@ namespace BuildForgeApp.Controllers
             }
             catch
             {
+                // user-friendly error instead of crashing
                 ModelState.AddModelError("", "Unable to create component. Please try again.");
                 return View(component);
             }
         }
 
+        // loads existing component into edit form
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -74,6 +80,7 @@ namespace BuildForgeApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, PcComponent component)
         {
+            // ensures URL id matches form id (prevents tampering)
             if (id != component.Id)
                 return NotFound();
 
@@ -84,7 +91,7 @@ namespace BuildForgeApp.Controllers
 
             try
             {
-                _context.Update(component);
+                _context.Update(component); // updates entire entity in DB
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -96,6 +103,7 @@ namespace BuildForgeApp.Controllers
             }
         }
 
+        // confirmation page before deleting
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -120,6 +128,7 @@ namespace BuildForgeApp.Controllers
 
             try
             {
+                // soft delete: hides component instead of removing it
                 component.IsActive = false;
                 await _context.SaveChangesAsync();
 
@@ -141,7 +150,7 @@ namespace BuildForgeApp.Controllers
             if (component == null)
                 return NotFound();
 
-            component.IsActive = true;
+            component.IsActive = true; // brings back previously "deleted" component
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -158,6 +167,7 @@ namespace BuildForgeApp.Controllers
 
             try
             {
+                // hard delete: permanently removes from database
                 _context.PcComponents.Remove(component);
                 await _context.SaveChangesAsync();
 
