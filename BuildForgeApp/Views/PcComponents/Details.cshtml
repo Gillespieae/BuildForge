@@ -1,40 +1,52 @@
 @model BuildForgeApp.Models.PcComponent
 
 @{
-    ViewData["Title"] = "Component Details";
+    ViewData["Title"] = "Component Details"; // page title
 }
 
 <h1>Component Details</h1>
 
 <div>
     <hr />
-    <dl class="row">
+    <dl class="row"> <!-- definition list used for label/value layout -->
+
         <dt class="col-sm-3">Name</dt>
-        <dd class="col-sm-9">@Model.Name</dd>
+        <dd class="col-sm-9">@Model.Name</dd> <!-- displays component name -->
 
         <dt class="col-sm-3">Brand</dt>
-        <dd class="col-sm-9">@Model.Brand</dd>
+        <dd class="col-sm-9">@Model.Brand</dd> <!-- displays brand -->
 
         <dt class="col-sm-3">Type</dt>
-        <dd class="col-sm-9">@Model.ComponentType</dd>
+        <dd class="col-sm-9">@Model.ComponentType</dd> <!-- displays component type -->
 
         <dt class="col-sm-3">Price</dt>
-        <dd class="col-sm-9">@Model.Price.ToString("C")</dd>
+        <dd class="col-sm-9">@Model.Price.ToString("C")</dd> <!-- formatted price -->
 
         <dt class="col-sm-3">Socket Type</dt>
-        <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.SocketType) ? "N/A" : Model.SocketType)</dd>
+        <dd class="col-sm-9">
+            @(string.IsNullOrEmpty(Model.SocketType) ? "N/A" : Model.SocketType)
+        </dd> <!-- shows socket or N/A if empty -->
 
         <dt class="col-sm-3">Form Factor</dt>
-        <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.FormFactor) ? "N/A" : Model.FormFactor)</dd>
+        <dd class="col-sm-9">
+            @(string.IsNullOrEmpty(Model.FormFactor) ? "N/A" : Model.FormFactor)
+        </dd> <!-- shows form factor or N/A -->
 
         <dt class="col-sm-3">Wattage</dt>
-        <dd class="col-sm-9">@(Model.Wattage.HasValue ? Model.Wattage.ToString() : "N/A")</dd>
+        <dd class="col-sm-9">
+            @(Model.Wattage.HasValue ? Model.Wattage.ToString() : "N/A")
+        </dd> <!-- shows wattage if present -->
 
         <dt class="col-sm-3">Capacity (GB)</dt>
-        <dd class="col-sm-9">@(Model.CapacityGB.HasValue ? Model.CapacityGB.ToString() : "N/A")</dd>
+        <dd class="col-sm-9">
+            @(Model.CapacityGB.HasValue ? Model.CapacityGB.ToString() : "N/A")
+        </dd> <!-- shows capacity if present -->
+
     </dl>
 </div>
 
 <div>
-    <a asp-action="Index" class="btn btn-secondary">Back to Catalog</a>
+    <a asp-action="Index" class="btn btn-secondary">
+        Back to Catalog
+    </a> <!-- returns to component list -->
 </div>
