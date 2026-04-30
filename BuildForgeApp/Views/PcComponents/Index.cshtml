@@ -1,7 +1,9 @@
 @model IEnumerable<BuildForgeApp.Models.PcComponent>
 
 @{
-    ViewData["Title"] = "Component Catalog";
+    ViewData["Title"] = "Component Catalog"; // page title
+
+    // lists passed from controller for dropdown filters
     var categories = ViewBag.Categories as List<string> ?? new List<string>();
     var brands = ViewBag.Brands as List<string> ?? new List<string>();
 }
@@ -9,19 +11,19 @@
 <h1>Component Catalog</h1>
 
 <div class="mb-3">
-    <input id="catalogSearch" class="form-control" placeholder="Live search..." />
+    <input id="catalogSearch" class="form-control" placeholder="Live search..." /> <!-- client-side live search -->
 </div>
 
 <form asp-action="Index" method="get" class="mb-4">
-    <input type="hidden" name="buildId" value="@ViewBag.BuildId" />
+    <input type="hidden" name="buildId" value="@ViewBag.BuildId" /> <!-- keeps current build context -->
 
     <div class="row g-2">
         <div class="col-md-4">
-            <input type="text" name="searchString" class="form-control" placeholder="Search..." />
+            <input type="text" name="searchString" class="form-control" placeholder="Search..." /> <!-- server-side search -->
         </div>
 
         <div class="col-md-3">
-            <select name="category" class="form-select">
+            <select name="category" class="form-select"> <!-- category filter -->
                 <option value="">All Categories</option>
                 @foreach (var c in categories)
                 {
@@ -31,7 +33,7 @@
         </div>
 
         <div class="col-md-3">
-            <select name="brand" class="form-select">
+            <select name="brand" class="form-select"> <!-- brand filter -->
                 <option value="">All Brands</option>
                 @foreach (var b in brands)
                 {
@@ -41,7 +43,7 @@
         </div>
 
         <div class="col-md-2">
-            <button class="btn btn-primary w-100">Filter</button>
+            <button class="btn btn-primary w-100">Filter</button> <!-- submits filter form -->
         </div>
     </div>
 </form>
@@ -49,7 +51,7 @@
 @if (!Model.Any())
 {
     <div class="alert alert-warning">
-        No components found.
+        No components found. <!-- shown if no results -->
     </div>
 }
 else
@@ -61,7 +63,7 @@ else
                 <th>Brand</th>
                 <th>Type</th>
                 <th>Price</th>
-                <th></th>
+                <th></th> <!-- actions -->
             </tr>
         </thead>
 
@@ -69,20 +71,27 @@ else
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.Name</td>
-                    <td>@item.Brand</td>
-                    <td>@item.ComponentType</td>
-                    <td>@item.Price.ToString("C")</td>
+                    <td>@item.Name</td> <!-- component name -->
+                    <td>@item.Brand</td> <!-- brand -->
+                    <td>@item.ComponentType</td> <!-- type -->
+                    <td>@item.Price.ToString("C")</td> <!-- formatted price -->
+
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                            Details
+                        </a> <!-- view component details -->
 
                         @if (ViewBag.BuildId != null)
                         {
                             <form asp-action="AddToBuild" method="post" style="display:inline;">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="buildId" value="@ViewBag.BuildId" />
-                                <input type="hidden" name="componentId" value="@item.Id" />
-                                <button type="submit" class="btn btn-sm btn-success">Add</button>
+                                @Html.AntiForgeryToken() <!-- security token -->
+
+                                <input type="hidden" name="buildId" value="@ViewBag.BuildId" /> <!-- target build -->
+                                <input type="hidden" name="componentId" value="@item.Id" /> <!-- selected component -->
+
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    Add
+                                </button> <!-- adds component to build -->
                             </form>
                         }
                     </td>
@@ -95,21 +104,21 @@ else
 @section Scripts {
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const searchInput = document.getElementById("catalogSearch")
-    const tableBody = document.getElementById("componentTableBody")
+    const searchInput = document.getElementById("catalogSearch") // live search input
+    const tableBody = document.getElementById("componentTableBody") // table body rows
 
     if (!searchInput || !tableBody) {
-        return
+        return // exit if elements not found
     }
 
-    let originalRows = Array.from(tableBody.querySelectorAll("tr"))
+    let originalRows = Array.from(tableBody.querySelectorAll("tr")) // store all rows
 
     searchInput.addEventListener("input", () => {
-        const text = searchInput.value.toLowerCase()
+        const text = searchInput.value.toLowerCase() // current search text
 
         originalRows.forEach(row => {
-            const rowText = row.innerText.toLowerCase()
-            row.style.display = rowText.includes(text) ? "" : "none"
+            const rowText = row.innerText.toLowerCase() // row content
+            row.style.display = rowText.includes(text) ? "" : "none" // show/hide row
         })
     })
 })
